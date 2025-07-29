@@ -31,13 +31,21 @@ class MatchProfileViewModel @Inject constructor(
                         )
                     }
                 } else {
+                    state = state.copy(
+                        error = true,
+                        errorMessage = "Error fetching data"
+                    )
                     // Handle error (e.g., log response.errorBody()?.string())
-                    println("API Error: ${response.code()} - ${response.message()}")
+                    Log.d("TAG", "API Error: ${response.code()} - ${response.message()}")
 
                 }
             } catch (e: Exception) {
+                state = state.copy(
+                    error = true,
+                    errorMessage = "Error fetching data"
+                )
                 // Handle network exceptions or other errors
-                println("Network Exception: ${e.message}")
+                Log.d("TAG", "Network Exception: ${e.message}")
 
             }
         }

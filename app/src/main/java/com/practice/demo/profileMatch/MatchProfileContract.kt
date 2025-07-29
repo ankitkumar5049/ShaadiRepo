@@ -6,6 +6,9 @@ class MatchProfileContract{
 
     data class state(
         val listOfProfile: List<UserResult> = emptyList(),
+        val isLoading: Boolean = false,
+        val error: Boolean = true,
+        val errorMessage: String = "Something went wrong!"
     )
 
     data class ProfileUiState(

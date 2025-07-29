@@ -1,6 +1,7 @@
 package com.practice.demo.profileMatch
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -41,6 +43,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.practice.demo.domain.UserResult
 import com.practice.demo.ui.theme.Teal
+import com.practice.demo.uiComponents.AnimatedMessage
 import com.practice.demo.uiComponents.HeadingText
 import com.practice.demo.uiComponents.ProfilePicture
 import com.practice.demo.uiComponents.SelectionButton
@@ -58,20 +61,47 @@ fun MatchCard(
         viewmodel.getProfileList()
     }
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .systemBarsPadding()
     ) {
-        items(
-            items = viewmodel.state.listOfProfile,
-            key = { profile -> profile.login?.uuid?: ""
-            }
-        ) { profile ->
-            MatchCard(
-                viewmodel = viewmodel,
-                match = profile
+        Column(modifier = Modifier.fillMaxSize()) {
+            HeadingText(
+                inputText = CommonString.MATCH_PROFILE,
+                modifier = Modifier.padding(16.dp)
             )
+            if (viewmodel.state.error) {
+                AnimatedMessage(
+                    message = viewmodel.state.errorMessage,
+                    visible = viewmodel.state.error,
+                    backgroundColor = MaterialTheme.colorScheme.errorContainer,
+                    textColor = MaterialTheme.colorScheme.onErrorContainer,
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .systemBarsPadding()
+                        .fillMaxWidth(),
+                    onDismiss = {
+                        // viewModel.clearError()
+                    }
+                )
+            }
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                items(
+                    items = viewmodel.state.listOfProfile,
+                    key = { profile ->
+                        profile.login?.uuid ?: ""
+                    }
+                ) { profile ->
+                    MatchCard(
+                        viewmodel = viewmodel,
+                        match = profile
+                    )
+                }
+            }
         }
     }
 }
