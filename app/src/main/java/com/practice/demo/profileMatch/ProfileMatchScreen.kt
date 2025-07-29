@@ -17,8 +17,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Button
@@ -53,7 +55,9 @@ import com.practice.demo.utils.CommonString
 
 
 @Composable
-fun MatchCard(profiles: List<MatchProfileContract>) {
+fun MatchCard(
+    viewmodel: MatchProfileViewModel,
+    profiles: List<MatchProfileContract>) {
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -64,14 +68,17 @@ fun MatchCard(profiles: List<MatchProfileContract>) {
             items = profiles,
             key = { profile -> profile.id }
         ) { profile ->
-            MatchCard(match = profile)
+            MatchCard(viewmodel = viewmodel, match = profile)
         }
     }
 }
 
 
 @Composable
-fun MatchCard(match: MatchProfileContract) {
+fun MatchCard(
+    viewmodel: MatchProfileViewModel,
+    match: MatchProfileContract
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth(),
@@ -115,6 +122,32 @@ fun MatchCard(match: MatchProfileContract) {
 
                 SubHeadingText(
                     inputText = "${match.city}, ${match.country}",
+                )
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ){
+                Icon(
+                    imageVector = Icons.Default.Call,
+                    contentDescription = CommonDescriptionString.CALL,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp)
+                )
+                SubHeadingText(
+                    inputText = viewmodel.smartTruncate(match.phone,8, 10)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+
+                Icon(
+                    imageVector = Icons.Default.Email,
+                    contentDescription = CommonDescriptionString.EMAIL,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp)
+                )
+                SubHeadingText(
+                    inputText = viewmodel.smartTruncate(match.email,8, 10)
                 )
             }
 
