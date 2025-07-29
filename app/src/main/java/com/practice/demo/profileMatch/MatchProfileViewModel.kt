@@ -1,11 +1,48 @@
 package com.practice.demo.profileMatch
 
+import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.practice.demo.domain.MainRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class MatchProfileViewModel @Inject constructor(): ViewModel() {
+class MatchProfileViewModel @Inject constructor(
+    private val repository: MainRepository
+): ViewModel() {
+
+    var state by mutableStateOf(MatchProfileContract.state())
+
+    fun getProfileList(){
+        viewModelScope.launch {
+            try {
+                val response =repository.getUsers(count = 20)
+                if (response.isSuccessful) {
+                    Log.d("TAG", "getProfileList: ${response.body()}")
+                    response.body()?.let { userResponse ->
+                        Log.d("TAG", "getProfileList: ${userResponse.results}")
+                        state = state.copy(
+                            listOfProfile = userResponse.results
+                        )
+                    }
+                } else {
+                    // Handle error (e.g., log response.errorBody()?.string())
+                    println("API Error: ${response.code()} - ${response.message()}")
+
+                }
+            } catch (e: Exception) {
+                // Handle network exceptions or other errors
+                println("Network Exception: ${e.message}")
+
+            }
+        }
+
+    }
 
     fun smartTruncate(text: String?, desiredPrefixLength: Int, maxLengthWithEllipsis: Int): String {
         if (text == null) return ""

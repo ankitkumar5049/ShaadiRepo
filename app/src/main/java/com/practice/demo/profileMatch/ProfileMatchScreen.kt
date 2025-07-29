@@ -1,6 +1,5 @@
 package com.practice.demo.profileMatch
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -21,7 +20,6 @@ import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -31,20 +29,17 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
+import com.practice.demo.domain.UserResult
 import com.practice.demo.ui.theme.Teal
 import com.practice.demo.uiComponents.HeadingText
 import com.practice.demo.uiComponents.ProfilePicture
@@ -56,8 +51,12 @@ import com.practice.demo.utils.CommonString
 
 @Composable
 fun MatchCard(
-    viewmodel: MatchProfileViewModel,
-    profiles: List<MatchProfileContract>) {
+    viewmodel: MatchProfileViewModel
+    ) {
+
+    LaunchedEffect(Unit) {
+        viewmodel.getProfileList()
+    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -65,10 +64,14 @@ fun MatchCard(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         items(
-            items = profiles,
-            key = { profile -> profile.id }
+            items = viewmodel.state.listOfProfile,
+            key = { profile -> profile.login?.uuid?: ""
+            }
         ) { profile ->
-            MatchCard(viewmodel = viewmodel, match = profile)
+            MatchCard(
+                viewmodel = viewmodel,
+                match = profile
+            )
         }
     }
 }
@@ -77,7 +80,7 @@ fun MatchCard(
 @Composable
 fun MatchCard(
     viewmodel: MatchProfileViewModel,
-    match: MatchProfileContract
+    match: UserResult
 ) {
     Card(
         modifier = Modifier
@@ -97,14 +100,14 @@ fun MatchCard(
             var choosed by remember { mutableStateOf(false) }
 
             ProfilePicture(
-                imageUrl = match.largePictureUrl,
+                imageUrl = match.picture?.large,
                 contentDescription = CommonDescriptionString.PROFILE_PICTURE
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             HeadingText(
-                inputText = "${match.title} ${match.firstName} ${match.lastName}, ${match.age}",
+                inputText = "${match.name?.title} ${match.name?.first} ${match.name?.last}, ${match.dob?.age}",
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -121,7 +124,7 @@ fun MatchCard(
                 Spacer(modifier = Modifier.width(4.dp))
 
                 SubHeadingText(
-                    inputText = "${match.city}, ${match.country}",
+                    inputText = "${match.location?.city}, ${match.location?.country}",
                 )
             }
 
