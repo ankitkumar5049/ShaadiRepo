@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.practice.demo"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.practice.demo"

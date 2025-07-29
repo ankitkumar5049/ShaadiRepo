@@ -1,0 +1,173 @@
+package com.practice.demo.profileMatch
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import com.practice.demo.ui.theme.Teal
+import com.practice.demo.uiComponents.HeadingText
+import com.practice.demo.uiComponents.ProfilePicture
+import com.practice.demo.uiComponents.SelectionButton
+import com.practice.demo.uiComponents.SubHeadingText
+import com.practice.demo.utils.CommonDescriptionString
+import com.practice.demo.utils.CommonString
+
+
+@Composable
+fun MatchCard(profiles: List<MatchProfileContract>) {
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        items(
+            items = profiles,
+            key = { profile -> profile.id }
+        ) { profile ->
+            MatchCard(match = profile)
+        }
+    }
+}
+
+
+@Composable
+fun MatchCard(match: MatchProfileContract) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Profile Picture
+            var accepted by remember { mutableStateOf(false) }
+            var choosed by remember { mutableStateOf(false) }
+
+            ProfilePicture(
+                imageUrl = match.largePictureUrl,
+                contentDescription = CommonDescriptionString.PROFILE_PICTURE
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            HeadingText(
+                inputText = "${match.title} ${match.firstName} ${match.lastName}, ${match.age}",
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.LocationOn,
+                    contentDescription = CommonDescriptionString.LOCATION,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+
+                SubHeadingText(
+                    inputText = "${match.city}, ${match.country}",
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if(!choosed) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceAround,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+
+                    SelectionButton(
+                        isSelected = false,
+                        icon = Icons.Default.Close,
+                        selectedTintColor = Color.White,
+                        nonSelectedTintColor = Color.White,
+                        containerColor = Color.Red,
+                        onClick = {
+                            choosed = true
+                            accepted = false
+                        },
+                    )
+
+                    SelectionButton(
+                        isSelected = false,
+                        icon = Icons.Default.Check,
+                        selectedTintColor = Color.White,
+                        nonSelectedTintColor = Color.White,
+                        containerColor = Teal,
+                        onClick = {
+                            choosed = true
+                            accepted = true
+                        },
+                        )
+                }
+            }
+            if(choosed){
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { /* Handle accept action */ },
+                    colors = ButtonDefaults.buttonColors(containerColor = if(accepted) Teal else Color.Red),
+                    shape = CircleShape,
+                ) {
+                    Text(
+                        text = if(accepted) CommonString.ACCEPTED else CommonString.DECLINED,
+                        style = TextStyle(
+                            color = Color.White
+                        )
+                    )
+                }
+            }
+
+        }
+    }
+}
