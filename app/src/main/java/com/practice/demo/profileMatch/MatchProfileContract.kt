@@ -6,7 +6,7 @@ import com.practice.demo.utils.CommonString
 class MatchProfileContract{
 
     data class state(
-        val listOfProfile: List<UserResult> = emptyList(),
+        val listOfProfile: List<ProfileUiState> = emptyList(),
         val isLoading: Boolean = false,
         val error: Boolean = false,
         val errorMessage: String = CommonString.EMPTY_STRING,

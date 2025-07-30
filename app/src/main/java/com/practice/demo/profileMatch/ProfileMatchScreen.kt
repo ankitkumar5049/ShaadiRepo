@@ -1,5 +1,6 @@
 package com.practice.demo.profileMatch
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,10 +34,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -100,13 +97,12 @@ fun MatchCard(
                 ) {
                     items(
                         items = viewmodel.state.listOfProfile,
-                        key = { profile ->
-                            profile.login?.uuid ?: ""
-                        }
-                    ) { profile ->
+                        key = { it.profile.login?.uuid ?: "" }
+                    ) { uiState ->
                         MatchCard(
                             viewmodel = viewmodel,
-                            match = profile
+                            match = uiState.profile,
+                            interaction = uiState.interactionStatus
                         )
                     }
                 }
@@ -119,9 +115,9 @@ fun MatchCard(
 @Composable
 fun MatchCard(
     viewmodel: MatchProfileViewModel,
-    match: UserResult
+    match: UserResult,
+    interaction: MatchProfileContract.InteractionStatus
 ) {
-    val interaction = viewmodel.state.userInteractions[match.login?.uuid] ?: MatchProfileContract.InteractionStatus.NONE
     Card(
         modifier = Modifier
             .fillMaxWidth(),
@@ -135,9 +131,6 @@ fun MatchCard(
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Profile Picture
-            var accepted by remember { mutableStateOf(false) }
-            var choosed by remember { mutableStateOf(false) }
 
             ProfilePicture(
                 imageUrl = match.picture?.large,
@@ -147,7 +140,7 @@ fun MatchCard(
             Spacer(modifier = Modifier.height(16.dp))
 
             HeadingText(
-                inputText = "${match.name?.title} ${match.name?.first} ${match.name?.last}, ${match.dob?.age}",
+                inputText = "${match.name?.first}, ${match.dob?.age}",
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -196,6 +189,7 @@ fun MatchCard(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            Log.d("TAG", "MatchCard: $interaction")
             if(interaction == MatchProfileContract.InteractionStatus.NONE) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -234,7 +228,7 @@ fun MatchCard(
                     shape = CircleShape,
                 ) {
                     Text(
-                        text = if(accepted) CommonString.ACCEPTED else CommonString.DECLINED,
+                        text = if(interaction==MatchProfileContract.InteractionStatus.ACCEPTED) CommonString.ACCEPTED else CommonString.DECLINED,
                         style = TextStyle(
                             color = Color.White
                         )

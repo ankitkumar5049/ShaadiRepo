@@ -6,17 +6,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.practice.demo.domain.ApiService
+import com.practice.demo.db.MatchProfileRepository
 import com.practice.demo.domain.MainRepository
+import com.practice.demo.utils.toEntity
+import com.practice.demo.utils.toProfileUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Inject
 
 @HiltViewModel
 class MatchProfileViewModel @Inject constructor(
-    private val repository: MainRepository
+    private val repository: MainRepository,
+    private val repo: MatchProfileRepository
 ): ViewModel() {
 
     var state by mutableStateOf(MatchProfileContract.state())
@@ -27,13 +28,33 @@ class MatchProfileViewModel @Inject constructor(
                 state = state.copy(
                     isLoading = true
                 )
+
+                val cached = repo.getProfilesFromDb()
+                Log.d("TAG", "getProfileList: $cached")
+                if (cached.isNotEmpty()) {
+                    state = state.copy(
+                        listOfProfile = cached.map { it.toProfileUiState() },
+                        isLoading = false
+                    )
+                }
                 val response = repository.getUsers(count = 10)
 
                 if (response.isSuccessful) {
-                    val userResponse = response.body()
+                    val apiProfiles = response.body()?.results ?: emptyList()
+
+                    val entities = apiProfiles.map { it.toEntity() }
+
+                    repo.insertProfiles(entities)
+
+                    val uiProfiles = apiProfiles.map { user ->
+                        MatchProfileContract.ProfileUiState(
+                            profile = user,
+                            interactionStatus = MatchProfileContract.InteractionStatus.NONE
+                        )
+                    }
 
                     state = state.copy(
-                        listOfProfile = userResponse?.results ?: emptyList(),
+                        listOfProfile = uiProfiles,
                         isLoading = false
                     )
                 } else {
@@ -44,12 +65,34 @@ class MatchProfileViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
-                state = state.copy(
-                    error = true,
-                    errorMessage = "Network Error: ${e.message}",
-                    isLoading = false
-                )
+                val cached = repo.getProfilesFromDb()
+                if (cached.isNotEmpty()) {
+                    state = state.copy(
+                        listOfProfile = cached.map { it.toProfileUiState() },
+                        isLoading = false,
+                        error = false
+                    )
+                } else {
+                    state = state.copy(
+                        error = true,
+                        errorMessage = "Network Error: ${e.message}",
+                        isLoading = false
+                    )
+                }
             }
+        }
+    }
+
+    fun updateInteraction(uuid: String, status: MatchProfileContract.InteractionStatus) {
+        viewModelScope.launch {
+            repo.updateInteraction(uuid, status)
+
+            state = state.copy(
+                listOfProfile = state.listOfProfile.map {
+                    if (it.profile.login?.uuid == uuid) it.copy(interactionStatus = status)
+                    else it
+                }
+            )
         }
     }
 
@@ -82,11 +125,5 @@ class MatchProfileViewModel @Inject constructor(
         }
     }
 
-    fun updateInteraction(userId: String, status: MatchProfileContract.InteractionStatus) {
-        val updatedInteractions = state.userInteractions.toMutableMap()
-        updatedInteractions[userId] = status
-
-        state = state.copy(userInteractions = updatedInteractions)
-    }
 
 }
