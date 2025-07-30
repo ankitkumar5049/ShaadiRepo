@@ -14,8 +14,4 @@ interface ApiService {
 
     ): Response<UserResponse> // Using Response wrapper
 
-    @GET("api/")
-    suspend fun getSpecificNumberOfUsers(
-        @Query("results") count: Int = 20
-    ): Response<UserResponse>
 }

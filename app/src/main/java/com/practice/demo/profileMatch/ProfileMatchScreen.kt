@@ -27,6 +27,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -65,41 +66,49 @@ fun MatchCard(
         .fillMaxSize()
         .systemBarsPadding()
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            HeadingText(
-                inputText = CommonString.MATCH_PROFILE,
-                modifier = Modifier.padding(16.dp)
+        if(viewmodel.state.isLoading){
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center),
+                color = Teal
             )
-            if (viewmodel.state.error) {
-                AnimatedMessage(
-                    message = viewmodel.state.errorMessage,
-                    visible = viewmodel.state.error,
-                    backgroundColor = MaterialTheme.colorScheme.errorContainer,
-                    textColor = MaterialTheme.colorScheme.onErrorContainer,
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .systemBarsPadding()
-                        .fillMaxWidth(),
-                    onDismiss = {
-                        // viewModel.clearError()
-                    }
+        }
+        else {
+            Column(modifier = Modifier.fillMaxSize()) {
+                HeadingText(
+                    inputText = CommonString.MATCH_PROFILE,
+                    modifier = Modifier.padding(16.dp)
                 )
-            }
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                items(
-                    items = viewmodel.state.listOfProfile,
-                    key = { profile ->
-                        profile.login?.uuid ?: ""
-                    }
-                ) { profile ->
-                    MatchCard(
-                        viewmodel = viewmodel,
-                        match = profile
+                if (viewmodel.state.error) {
+                    AnimatedMessage(
+                        message = viewmodel.state.errorMessage,
+                        visible = viewmodel.state.error,
+                        backgroundColor = MaterialTheme.colorScheme.errorContainer,
+                        textColor = MaterialTheme.colorScheme.onErrorContainer,
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .systemBarsPadding()
+                            .fillMaxWidth(),
+                        onDismiss = {
+                            // viewModel.clearError()
+                        }
                     )
+                }
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(
+                        items = viewmodel.state.listOfProfile,
+                        key = { profile ->
+                            profile.login?.uuid ?: ""
+                        }
+                    ) { profile ->
+                        MatchCard(
+                            viewmodel = viewmodel,
+                            match = profile
+                        )
+                    }
                 }
             }
         }

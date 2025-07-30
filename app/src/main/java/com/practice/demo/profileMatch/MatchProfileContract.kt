@@ -1,14 +1,15 @@
 package com.practice.demo.profileMatch
 
 import com.practice.demo.domain.UserResult
+import com.practice.demo.utils.CommonString
 
 class MatchProfileContract{
 
     data class state(
         val listOfProfile: List<UserResult> = emptyList(),
         val isLoading: Boolean = false,
-        val error: Boolean = true,
-        val errorMessage: String = "Something went wrong!"
+        val error: Boolean = false,
+        val errorMessage: String = CommonString.EMPTY_STRING
     )
 
     data class ProfileUiState(

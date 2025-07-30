@@ -6,9 +6,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.practice.demo.domain.ApiService
 import com.practice.demo.domain.MainRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Inject
 
 @HiltViewModel
@@ -18,39 +21,38 @@ class MatchProfileViewModel @Inject constructor(
 
     var state by mutableStateOf(MatchProfileContract.state())
 
-    fun getProfileList(){
+    fun getProfileList() {
         viewModelScope.launch {
             try {
-                val response =repository.getUsers(count = 20)
+                state = state.copy(
+                    isLoading = true
+                )
+                val response = repository.getUsers(count = 10)
+
                 if (response.isSuccessful) {
-                    Log.d("TAG", "getProfileList: ${response.body()}")
-                    response.body()?.let { userResponse ->
-                        Log.d("TAG", "getProfileList: ${userResponse.results}")
-                        state = state.copy(
-                            listOfProfile = userResponse.results
-                        )
-                    }
+                    val userResponse = response.body()
+
+                    state = state.copy(
+                        listOfProfile = userResponse?.results ?: emptyList(),
+                        isLoading = false
+                    )
                 } else {
                     state = state.copy(
                         error = true,
-                        errorMessage = "Error fetching data"
+                        errorMessage = "Error fetching data: ${response.message()}",
+                        isLoading = false
                     )
-                    // Handle error (e.g., log response.errorBody()?.string())
-                    Log.d("TAG", "API Error: ${response.code()} - ${response.message()}")
-
                 }
             } catch (e: Exception) {
                 state = state.copy(
                     error = true,
-                    errorMessage = "Error fetching data"
+                    errorMessage = "Network Error: ${e.message}",
+                    isLoading = false
                 )
-                // Handle network exceptions or other errors
-                Log.d("TAG", "Network Exception: ${e.message}")
-
             }
         }
-
     }
+
 
     fun smartTruncate(text: String?, desiredPrefixLength: Int, maxLengthWithEllipsis: Int): String {
         if (text == null) return ""
