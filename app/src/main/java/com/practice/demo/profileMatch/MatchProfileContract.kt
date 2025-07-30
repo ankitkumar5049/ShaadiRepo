@@ -9,14 +9,12 @@ class MatchProfileContract{
         val listOfProfile: List<UserResult> = emptyList(),
         val isLoading: Boolean = false,
         val error: Boolean = false,
-        val errorMessage: String = CommonString.EMPTY_STRING
+        val errorMessage: String = CommonString.EMPTY_STRING,
+        val userInteractions: Map<String, InteractionStatus> = emptyMap()
     )
 
     data class ProfileUiState(
-        val profile: state,
-        val isAccepted: Boolean = false,
-        val isDeclined: Boolean = false,
-        val isFavorite: Boolean = false,
+        val profile: UserResult,
         val interactionStatus: InteractionStatus = InteractionStatus.NONE
     )
 

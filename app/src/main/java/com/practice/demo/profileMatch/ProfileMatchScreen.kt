@@ -121,6 +121,7 @@ fun MatchCard(
     viewmodel: MatchProfileViewModel,
     match: UserResult
 ) {
+    val interaction = viewmodel.state.userInteractions[match.login?.uuid] ?: MatchProfileContract.InteractionStatus.NONE
     Card(
         modifier = Modifier
             .fillMaxWidth(),
@@ -195,7 +196,7 @@ fun MatchCard(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            if(!choosed) {
+            if(interaction == MatchProfileContract.InteractionStatus.NONE) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceAround,
@@ -209,8 +210,7 @@ fun MatchCard(
                         nonSelectedTintColor = Color.White,
                         containerColor = Color.Red,
                         onClick = {
-                            choosed = true
-                            accepted = false
+                            viewmodel.updateInteraction(match.login?.uuid ?: "", MatchProfileContract.InteractionStatus.DECLINED)
                         },
                     )
 
@@ -221,17 +221,16 @@ fun MatchCard(
                         nonSelectedTintColor = Color.White,
                         containerColor = Teal,
                         onClick = {
-                            choosed = true
-                            accepted = true
+                            viewmodel.updateInteraction(match.login?.uuid ?: "", MatchProfileContract.InteractionStatus.ACCEPTED)
                         },
                         )
                 }
             }
-            if(choosed){
+            else{
                 Button(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = { /* Handle accept action */ },
-                    colors = ButtonDefaults.buttonColors(containerColor = if(accepted) Teal else Color.Red),
+                    colors = ButtonDefaults.buttonColors(containerColor = if(interaction==MatchProfileContract.InteractionStatus.ACCEPTED) Teal else Color.Red),
                     shape = CircleShape,
                 ) {
                     Text(

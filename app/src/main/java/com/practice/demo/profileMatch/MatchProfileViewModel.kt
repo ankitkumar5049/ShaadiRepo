@@ -82,4 +82,11 @@ class MatchProfileViewModel @Inject constructor(
         }
     }
 
+    fun updateInteraction(userId: String, status: MatchProfileContract.InteractionStatus) {
+        val updatedInteractions = state.userInteractions.toMutableMap()
+        updatedInteractions[userId] = status
+
+        state = state.copy(userInteractions = updatedInteractions)
+    }
+
 }
