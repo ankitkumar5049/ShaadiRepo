@@ -1,6 +1,5 @@
 package com.practice.demo.uiComponents
 
-import android.graphics.Color
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -23,7 +22,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.practice.demo.ui.theme.Teal
 import com.practice.demo.ui.theme.White
 
 @Composable
@@ -31,7 +29,7 @@ fun AnimatedMatchCard(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
-    val animOffsetX = remember { Animatable(400f) } // Start slightly offscreen
+    val animOffsetX = remember { Animatable(400f) }
     LaunchedEffect(Unit) {
         animOffsetX.animateTo(
             targetValue = 0f,
@@ -78,7 +76,7 @@ Button(
             .offset { IntOffset(0, offsetY.value.toInt()) },
         onClick = { /* optional: handle click */ },
         colors = ButtonDefaults.buttonColors(
-            containerColor = color  // ✅ works in Material3
+            containerColor = color
         ),
         shape = CircleShape
     ) {

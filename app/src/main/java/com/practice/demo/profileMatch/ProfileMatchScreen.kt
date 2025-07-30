@@ -233,19 +233,6 @@ fun MatchCard(
                     color = if (interaction == MatchProfileContract.InteractionStatus.ACCEPTED)
                         Teal else Color.Red
                 )
-//                Button(
-//                    modifier = Modifier.fillMaxWidth(),
-//                    onClick = { /* Handle accept action */ },
-//                    colors = ButtonDefaults.buttonColors(containerColor = if(interaction==MatchProfileContract.InteractionStatus.ACCEPTED) Teal else Color.Red),
-//                    shape = CircleShape,
-//                ) {
-//                    Text(
-//                        text = if(interaction==MatchProfileContract.InteractionStatus.ACCEPTED) CommonString.ACCEPTED else CommonString.DECLINED,
-//                        style = TextStyle(
-//                            color = Color.White
-//                        )
-//                    )
-//                }
             }
 
         }
