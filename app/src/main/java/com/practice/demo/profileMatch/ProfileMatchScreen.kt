@@ -41,7 +41,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.practice.demo.domain.UserResult
 import com.practice.demo.ui.theme.Teal
+import com.practice.demo.uiComponents.AnimatedMatchCard
 import com.practice.demo.uiComponents.AnimatedMessage
+import com.practice.demo.uiComponents.FallingActionButton
 import com.practice.demo.uiComponents.HeadingText
 import com.practice.demo.uiComponents.ProfilePicture
 import com.practice.demo.uiComponents.SelectionButton
@@ -99,11 +101,15 @@ fun MatchCard(
                         items = viewmodel.state.listOfProfile,
                         key = { it.profile.login?.uuid ?: "" }
                     ) { uiState ->
-                        MatchCard(
-                            viewmodel = viewmodel,
-                            match = uiState.profile,
-                            interaction = uiState.interactionStatus
-                        )
+                        AnimatedMatchCard(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            MatchCard(
+                                viewmodel = viewmodel,
+                                match = uiState.profile,
+                                interaction = uiState.interactionStatus
+                            )
+                        }
                     }
                 }
             }
@@ -221,19 +227,25 @@ fun MatchCard(
                 }
             }
             else{
-                Button(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = { /* Handle accept action */ },
-                    colors = ButtonDefaults.buttonColors(containerColor = if(interaction==MatchProfileContract.InteractionStatus.ACCEPTED) Teal else Color.Red),
-                    shape = CircleShape,
-                ) {
-                    Text(
-                        text = if(interaction==MatchProfileContract.InteractionStatus.ACCEPTED) CommonString.ACCEPTED else CommonString.DECLINED,
-                        style = TextStyle(
-                            color = Color.White
-                        )
-                    )
-                }
+                FallingActionButton(
+                    text = if (interaction == MatchProfileContract.InteractionStatus.ACCEPTED)
+                        CommonString.ACCEPTED else CommonString.DECLINED,
+                    color = if (interaction == MatchProfileContract.InteractionStatus.ACCEPTED)
+                        Teal else Color.Red
+                )
+//                Button(
+//                    modifier = Modifier.fillMaxWidth(),
+//                    onClick = { /* Handle accept action */ },
+//                    colors = ButtonDefaults.buttonColors(containerColor = if(interaction==MatchProfileContract.InteractionStatus.ACCEPTED) Teal else Color.Red),
+//                    shape = CircleShape,
+//                ) {
+//                    Text(
+//                        text = if(interaction==MatchProfileContract.InteractionStatus.ACCEPTED) CommonString.ACCEPTED else CommonString.DECLINED,
+//                        style = TextStyle(
+//                            color = Color.White
+//                        )
+//                    )
+//                }
             }
 
         }
