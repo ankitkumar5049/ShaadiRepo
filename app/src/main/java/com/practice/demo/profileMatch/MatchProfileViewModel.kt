@@ -1,6 +1,5 @@
 package com.practice.demo.profileMatch
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -8,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.practice.demo.db.MatchProfileRepository
 import com.practice.demo.domain.MainRepository
+import com.practice.demo.utils.CommonString
 import com.practice.demo.utils.toEntity
 import com.practice.demo.utils.toProfileUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,32 +21,32 @@ class MatchProfileViewModel @Inject constructor(
 ): ViewModel() {
 
     var state by mutableStateOf(MatchProfileContract.state())
+    private var currentPage = 1
+    private val pageSize = 10
+    private var isLoadingMore = false
 
-    fun getProfileList() {
+    fun getProfileList(loadMore: Boolean = false) {
+        if (isLoadingMore) return
+
         viewModelScope.launch {
             try {
-                state = state.copy(
-                    isLoading = true
-                )
-
-                val cached = repo.getProfilesFromDb()
-                Log.d("TAG", "getProfileList: $cached")
-                if (cached.isNotEmpty()) {
-                    state = state.copy(
-                        listOfProfile = cached.map { it.toProfileUiState() },
-                        isLoading = false
-                    )
+                if (!loadMore) {
+                    // Reset for first load
+                    state = state.copy(isLoading = true)
+                    currentPage = 1
+                } else {
+                    isLoadingMore = true
                 }
-                val response = repository.getUsers(count = 10)
+
+                val response = repository.getUsers(count = pageSize, page = currentPage)
 
                 if (response.isSuccessful) {
                     val apiProfiles = response.body()?.results ?: emptyList()
-
                     val entities = apiProfiles.map { it.toEntity() }
 
                     repo.insertProfiles(entities)
 
-                    val uiProfiles = apiProfiles.map { user ->
+                    val newUiProfiles = apiProfiles.map { user ->
                         MatchProfileContract.ProfileUiState(
                             profile = user,
                             interactionStatus = MatchProfileContract.InteractionStatus.NONE
@@ -54,9 +54,15 @@ class MatchProfileViewModel @Inject constructor(
                     }
 
                     state = state.copy(
-                        listOfProfile = uiProfiles,
+                        listOfProfile = if (loadMore) {
+                            state.listOfProfile + newUiProfiles
+                        } else {
+                            newUiProfiles
+                        },
                         isLoading = false
                     )
+
+                    currentPage++
                 } else {
                     state = state.copy(
                         error = true,
@@ -64,6 +70,7 @@ class MatchProfileViewModel @Inject constructor(
                         isLoading = false
                     )
                 }
+
             } catch (e: Exception) {
                 val cached = repo.getProfilesFromDb()
                 if (cached.isNotEmpty()) {
@@ -75,13 +82,16 @@ class MatchProfileViewModel @Inject constructor(
                 } else {
                     state = state.copy(
                         error = true,
-                        errorMessage = "Network Error: ${e.message}",
+                        errorMessage = CommonString.SOMETHING_WENT_WRONG,
                         isLoading = false
                     )
                 }
+            } finally {
+                isLoadingMore = false
             }
         }
     }
+
 
     fun updateInteraction(uuid: String, status: MatchProfileContract.InteractionStatus) {
         viewModelScope.launch {
